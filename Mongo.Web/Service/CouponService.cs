@@ -26,7 +26,7 @@ namespace Mongo.Web.Service
             return await _baseService.SendAsync(new RequestDTO()
             {
                 ApiType = SD.ApiType.DELETE,
-                Url = SD.CouponAPIBase + "/api/coupon" + couponCode
+                Url = SD.CouponAPIBase + "/api/coupon/" + couponCode
             });
         }
 
@@ -48,12 +48,12 @@ namespace Mongo.Web.Service
             });
         }
 
-        public async Task<ResponseDTO?> GetCouponByIdAsync(int couponCode)
+        public async Task<ResponseDTO?> GetCouponByIdAsync(int id)
         {
             return await _baseService.SendAsync(new RequestDTO()
             {
                 ApiType = SD.ApiType.GET,
-                Url = SD.CouponAPIBase + "/api/coupon" + couponCode
+                Url = SD.CouponAPIBase + "/api/coupon/" + id
             });
         }
 

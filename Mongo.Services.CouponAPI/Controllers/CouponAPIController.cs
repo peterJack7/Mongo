@@ -117,6 +117,7 @@ namespace Mongo.Services.CouponAPI.Controllers
         }
 
         [HttpDelete]
+        [Route("{id:int}")]
         public ResponseDTO Delete(int id)
         {
             try
