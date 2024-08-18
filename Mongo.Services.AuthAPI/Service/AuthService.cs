@@ -13,11 +13,14 @@ namespace Mongo.Services.AuthAPI.Service
 
         private readonly UserManager<ApplicationUser> _userManager;
         public readonly RoleManager<IdentityRole> _roleManager;
-        public AuthService(AppDbContext context, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+        private readonly IJwtTokenGenerator _jwtTokenGenerator;
+        public AuthService(AppDbContext context, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager,
+            IJwtTokenGenerator jwtTokenGenerator)
         {
             _context = context;
             _roleManager = roleManager;
             _userManager = userManager;
+            _jwtTokenGenerator = jwtTokenGenerator;
         }
         public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO)
         {
@@ -28,7 +31,7 @@ namespace Mongo.Services.AuthAPI.Service
             {
                 return new LoginResponseDTO() { Token = "", User = null };
             }
-
+            var token = _jwtTokenGenerator.GenerateToken(user);
             UserDTO userDTO = new()
             {
                 Email = user.Email,
@@ -39,7 +42,7 @@ namespace Mongo.Services.AuthAPI.Service
 
             LoginResponseDTO response = new LoginResponseDTO()
             {
-                Token = "",
+                Token = token,
                 User = userDTO
             };
             return response;
@@ -82,6 +85,21 @@ namespace Mongo.Services.AuthAPI.Service
             }
             catch (Exception ex) { }
             return "Error Occured";
+        }
+
+        public async Task<bool> AssignRole(string email, string RoleName)
+        {
+            var user = _context.ApplicationUsers.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
+            if (user != null)
+            {
+                if (!_roleManager.RoleExistsAsync(RoleName).GetAwaiter().GetResult())
+                {
+                    _roleManager.CreateAsync(new IdentityRole(RoleName)).GetAwaiter().GetResult();
+                }
+                await _userManager.AddToRoleAsync(user, RoleName);
+                return true;
+            }
+            return false;
         }
     }
 }
