@@ -16,11 +16,23 @@ builder.Services.AddHttpClient<ICouponService, ICouponService>().ConfigurePrimar
         ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
     };
     return handler;
-}); ;
+});
+
+builder.Services.AddHttpClient<IAuthServicecs, IAuthServicecs>().ConfigurePrimaryHttpMessageHandler(() =>
+{
+    var handler = new HttpClientHandler
+    {
+        // Bypass SSL certificate validation (use with caution, not for production)
+        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+    };
+    return handler;
+});
 SD.CouponAPIBase = builder.Configuration["ServiceUrls:CouponAPI"];
+SD.AuthAPIBase = builder.Configuration["ServiceUrls:AuthAPI"];
 
 builder.Services.AddScoped<IBaseService, BaseService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
+builder.Services.AddScoped<IAuthServicecs, AuthService>();
 
 var app = builder.Build();
 
